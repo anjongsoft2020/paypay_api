@@ -11,7 +11,7 @@ const port = process.env.APP_PORT ? process.env.APP_PORT : 4000;
 const API_KEY       = configs.API_KEY;
 const API_SECRET    = configs.API_SECRET;
 const MERCHANT_ID   = configs.MERCHANT_ID;
-const productionMode= config.productionMode;
+const productionMode= configs.productionMode;
 
 function configurePayPay() {
     PAYPAY.Configure({
