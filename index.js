@@ -11,13 +11,14 @@ const port = process.env.APP_PORT ? process.env.APP_PORT : 4000;
 const API_KEY       = configs.API_KEY;
 const API_SECRET    = configs.API_SECRET;
 const MERCHANT_ID   = configs.MERCHANT_ID;
+const productionMode= config.productionMode;
 
 function configurePayPay() {
     PAYPAY.Configure({
         clientId: API_KEY,
         clientSecret: API_SECRET,
         merchantId: MERCHANT_ID,
-        productionMode: false
+        productionMode: productionMode
     });
 }
 configurePayPay();
@@ -33,6 +34,30 @@ app.use(express.static(__dirname));
 app.get("/", (req, res) => {
     res.render(__dirname+"index.html")
 })
+
+
+app.get("/getLabQR", (req, res) => {   
+    getLabQR(req, res);  
+})
+
+async function getLabQR(req, res) {
+
+    // var request = require("request");
+
+    // var options = { method: POST,
+    // url: /v2/codes,
+    // headers: {    
+    //     'Authorization': 'hmac OPA-Auth:a_d0BFWIoJUV_ii0P:munMR2ksHud5OwXu/tXw4uojgPUzUNWQnh7H0fiJvlM=:5f68fd:1690962365:goFh3PqK8qgMqOj5Dv3cOQ==',
+    //     'X-ASSUME-MERCHANT': 653517310849630208,
+    //     'Content-Type': 'application/json',
+    // },
+    //   body: {"amount":1000,"codeType":"ORDER_QR","merchantPaymentId":"DEVELOPER-PANEL-DEMO-06be7ef6-1f90-4444-a21b-99a27c52c4ce","orderDescription":""}, 
+    //   json: true };
+    //    request(options, function (error, response, body) {
+    //     if (error) throw new Error(error);
+    //     console.log(body);
+    // });
+}
 
 async function getQR(req, res) {
 

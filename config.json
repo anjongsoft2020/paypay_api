@@ -5,5 +5,6 @@
 
     "_API_KEY": "a_IYIkib2I9v_HeSS",
     "_API_SECRET": "6Sjs/npUcY5YBLxSvx2hDs3Ij3YzfYo3lgDL5zVra28=",
-    "_MERCHANT_ID": "668714623139053568"
+    "_MERCHANT_ID": "668714623139053568",
+    "productionMode": false
 }
