@@ -65,7 +65,7 @@ async function getQR(req, res) {
         clientId: API_KEY,
         clientSecret: API_SECRET,
         merchantId: MERCHANT_ID,
-        productionMode: false
+        productionMode: productionMode
     });
 
     var uuid = uuidv4() // 支払いID（一意になるようにuuidで生成）    
@@ -105,14 +105,13 @@ async function getQR(req, res) {
     res.send(response.BODY)
 }
 
-
 async function GetCodePaymentDetails(req, res) {
 
     PAYPAY.Configure({
         clientId: API_KEY,
         clientSecret: API_SECRET,
         merchantId: MERCHANT_ID,
-        productionMode: false
+        productionMode: productionMode
     });
 
     const merchantPaymentId        = req.body.merchantPaymentId;  
@@ -124,14 +123,13 @@ async function GetCodePaymentDetails(req, res) {
     console.log(body1);
 }
 
-
 async function SetPaymentRefund(req, res) {
 
     PAYPAY.Configure({
         clientId: API_KEY,
         clientSecret: API_SECRET,
         merchantId: MERCHANT_ID,
-        productionMode: false
+        productionMode: productionMode
     });
 
     const amount            = req.body.amount;  
@@ -165,7 +163,7 @@ async function PaymentCancel(req, res) {
         clientId: API_KEY,
         clientSecret: API_SECRET,
         merchantId: MERCHANT_ID,
-        productionMode: false
+        productionMode: productionMode
     });
 
     const merchantPaymentId        = req.body.merchantPaymentId;  
@@ -183,7 +181,7 @@ async function GetRefundDetails(req, res) {
         clientId: API_KEY,
         clientSecret: API_SECRET,
         merchantId: MERCHANT_ID,
-        productionMode: false
+        productionMode: productionMode
     });
 
     const merchantRefundId        = req.body.merchantRefundId;  
@@ -201,7 +199,7 @@ async function QRCodeDelete(req, res) {
         clientId: API_KEY,
         clientSecret: API_SECRET,
         merchantId: MERCHANT_ID,
-        productionMode: false
+        productionMode: productionMode
     });
 
     const codeId        = req.body.codeId;  
@@ -212,7 +210,79 @@ async function QRCodeDelete(req, res) {
         res.send(response.BODY);
     }); 
 }
+
+async function SetPaymentAuthCapture(req, res) {
+
+    PAYPAY.Configure({
+        clientId: API_KEY,
+        clientSecret: API_SECRET,
+        merchantId: MERCHANT_ID,
+        productionMode: productionMode
+    });
     
+    var uuid = uuidv4() // 支払いID（一意になるようにuuidで生成）    
+    // const merchantPaymentId = uuid;
+    const merchantPaymentId = BigInt(
+        "0x" + uuid.replace(/-/g, "")
+    ).toString();
+    // const merchantPaymentId = BigInt(hex).toString(); // don't convert this to a number
+
+    var uuid1 = uuidv4() // 支払いID（一意になるようにuuidで生成）    
+    // const merchantPaymentId = uuid;
+    const merchant_capture_id = BigInt(
+        "0x" + uuid1.replace(/-/g, "")
+    ).toString();
+    
+    const amount        = req.body.amount;  
+    const description   = "PaymentAuthCapture:"+req.body.description;  
+    const redirectUrl   = req.body.redirectUrl + "&merchantPaymentId="+ merchantPaymentId; //"http://127.0.0.1/web/shopping/sln_card_payment?flag=1",
+    
+    let payload = {
+        merchantPaymentId: merchantPaymentId,
+        amount: {
+            amount: amount,
+            currency: 'JPY',
+        },
+        merchantCaptureId: merchant_capture_id,
+        requestedAt: 1587460334340,
+        orderDescription: description,
+    };
+  // Calling the method to Capture a Payment Authorization
+  PAYPAY.PaymentAuthCapture(payload, (response) => {
+    // Printing if the method call was SUCCESS
+
+    let body_arr = JSON.parse(response.BODY);
+    res.send(response.BODY);
+    console.log(response.BODY.resultInfo.code);
+  });
+}
+
+async function SetPaymentAuthRevert(req, res) {
+
+    PAYPAY.Configure({
+        clientId: API_KEY,
+        clientSecret: API_SECRET,
+        merchantId: MERCHANT_ID,
+        productionMode: productionMode
+    });
+
+    const amount            = req.body.amount;  
+    const merchant_revert_id = req.body.merchant_revert_id;  
+    const paypay_payment_id  = req.body.paypay_payment_id; 
+    const description       = req.body.reason_des;  
+    
+    let payload = {
+        merchantRevertId: merchant_revert_id,
+        paymentId: paypay_payment_id,
+        reason: description,
+      };
+      // Calling the method to Revert a Payment Authorization
+      PAYPAY.PaymentAuthRevert(payload, (response) => {
+       // Printing if the method call was SUCCESS
+         console.log(response.BODY);
+         res.send(response.BODY);
+      });    
+}
 
 app.post("/QRCodeDelete", (req, res) => {    
     
@@ -246,12 +316,21 @@ app.post("/getPaymentDetails", (req, res) => {
     // console.log(req);
 })
 
+app.post("/SetPaymentAuthCapture", (req, res) => {    
+    
+    SetPaymentAuthCapture(req, res);    
+
+})
+
+app.get("/SetPaymentAuthCapture", (req, res) => {  
+    
+    SetPaymentAuthCapture(req, res);
+})
 
 app.get("/getQR", (req, res) => {    
     
     getQR(req, res);
-    
-    // console.log(req);
+
 })
 
 app.post("/getQR", (req, res) => {    
@@ -302,6 +381,23 @@ app.post("/payment", (req, res) => {
 app.get("/getInfo", (req, res) => {   
     
     res.send('clientId: ' + API_KEY + '<br> clientSecret: '+API_SECRET + '<br> merchantId: '+MERCHANT_ID);   
+  
+})
+
+
+app.get("/getPaypayInfo", (req, res) => {   
+    
+    console.log(req.body);
+    console.log(res.BODY);
+    res.send("OK");
+  
+})
+
+app.post("/getPaypayInfo", (req, res) => {   
+    
+    console.log(req.body);
+    console.log(res.BODY);
+    res.send("OK");
   
 })
 
