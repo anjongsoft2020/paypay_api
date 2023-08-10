@@ -8,10 +8,16 @@ const configs = require('./config.json');
 
 
 const port = process.env.APP_PORT ? process.env.APP_PORT : 4000;
+
+// const API_KEY       = configs.API_KEY;
+// const API_SECRET    = configs.API_SECRET;
+// const MERCHANT_ID   = configs.MERCHANT_ID;
+// const productionMode= configs.productionMode;
+
 const API_KEY       = process.env.API_KEY;
 const API_SECRET    = process.env.API_SECRET;
 const MERCHANT_ID   = process.env.MERCHANT_ID;
-const productionMode= process.env.productionMode;
+const productionMode= process.env.productionMode=='true' ? true:false;
 
 function configurePayPay() {
     PAYPAY.Configure({
@@ -30,7 +36,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(express.static(__dirname));
 
-console.log(process.env.API_KEY,process.env.productionMode);
+console.log(API_KEY,(API_SECRET),MERCHANT_ID,(productionMode));
 
 app.get("/", (req, res) => {
     res.render(__dirname+"index.html")
@@ -81,9 +87,9 @@ async function getQR(req, res) {
     ).toString();
     // const merchantPaymentId = BigInt(hex).toString(); // don't convert this to a number
 
-    const amount        = req.body.amount;  
-    const description   = req.body.description;  
-    const redirectUrl   = req.body.redirectUrl + "&merchantPaymentId="+ merchantPaymentId; //"http://127.0.0.1/web/shopping/sln_card_payment?flag=1",
+    const amount        = req.body.amount?req.body.amount:1;  
+    const description   = req.body.description?req.body.amount:'';  
+    const redirectUrl   = req.body.redirectUrl + "&merchantPaymentId="+ merchantPaymentId?req.body.redirectUrl + "&merchantPaymentId="+ merchantPaymentId:''; //"http://127.0.0.1/web/shopping/sln_card_payment?flag=1",
 
     let payload = {
         merchantPaymentId: merchantPaymentId,
