@@ -8,12 +8,10 @@ const configs = require('./config.json');
 
 
 const port = process.env.APP_PORT ? process.env.APP_PORT : 4000;
-
 // const API_KEY       = configs.API_KEY;
 // const API_SECRET    = configs.API_SECRET;
 // const MERCHANT_ID   = configs.MERCHANT_ID;
 // const productionMode= configs.productionMode;
-
 const API_KEY       = process.env.API_KEY;
 const API_SECRET    = process.env.API_SECRET;
 const MERCHANT_ID   = process.env.MERCHANT_ID;
