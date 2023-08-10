@@ -2,16 +2,16 @@ const express = require("express");
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const PAYPAY = require('@paypayopa/paypayopa-sdk-node');
-const dotenv = require("dotenv")
+const dotenv = require("dotenv").config();
 const { v4: uuidv4 } = require('uuid');
 const configs = require('./config.json');
 
-const port = process.env.APP_PORT ? process.env.APP_PORT : 4000;
 
-const API_KEY       = configs.API_KEY;
-const API_SECRET    = configs.API_SECRET;
-const MERCHANT_ID   = configs.MERCHANT_ID;
-const productionMode= configs.productionMode;
+const port = process.env.APP_PORT ? process.env.APP_PORT : 4000;
+const API_KEY       = process.env.API_KEY;
+const API_SECRET    = process.env.API_SECRET;
+const MERCHANT_ID   = process.env.MERCHANT_ID;
+const productionMode= process.env.productionMode;
 
 function configurePayPay() {
     PAYPAY.Configure({
@@ -29,19 +29,18 @@ app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(express.static(__dirname));
-// app.use("/", apiRouter);
+
+console.log(process.env.API_KEY,process.env.productionMode);
 
 app.get("/", (req, res) => {
     res.render(__dirname+"index.html")
 })
-
 
 app.get("/getLabQR", (req, res) => {   
     getLabQR(req, res);  
 })
 
 async function getLabQR(req, res) {
-
     // var request = require("request");
 
     // var options = { method: POST,
@@ -59,6 +58,14 @@ async function getLabQR(req, res) {
     // });
 }
 
+/**
+ * @name   getQR() PayPay決済のコードを作成
+ * @param  amount req
+ * @param  description req 
+ * @param  redirectUrl req
+ * @return QRcode_info Response
+ * an added 2023.8.10 
+ */
 async function getQR(req, res) {
 
     PAYPAY.Configure({
@@ -69,7 +76,6 @@ async function getQR(req, res) {
     });
 
     var uuid = uuidv4() // 支払いID（一意になるようにuuidで生成）    
-    // const merchantPaymentId = uuid;
     const merchantPaymentId = BigInt(
         "0x" + uuid.replace(/-/g, "")
     ).toString();
@@ -94,16 +100,18 @@ async function getQR(req, res) {
     };
     
     const response = await PAYPAY.QRCodeCreate(payload);
-    let body_arr = JSON.parse(response.BODY);
-    if(body_arr.resultInfo.code === 'SUCCESS'){
-       
-        // open(body_arr.data.url);
-    }
+    let body_arr = JSON.parse(response.BODY);    
     const body = response.BODY;
-    // console.log(response.STATUS, body.resultInfo.code);
     console.log(body);
     res.send(response.BODY)
 }
+
+/**
+ * @name  GetCodePaymentDetails() このAPIを利用し決済が完了しているか確認
+ * @param  merchantPaymentId req 加盟店から提供された一意の支払い取引ID * 
+ * @return return 支払いが完了すると、response.data.statusのステータスが CREATED から COMPLETED に変わります。 支払いの事前認証の場合、response.data.statusのステータスは CREATED から AUTHORIZED に変わります
+ * an added 2023.8.10 
+ */
 
 async function GetCodePaymentDetails(req, res) {
 
@@ -119,9 +127,18 @@ async function GetCodePaymentDetails(req, res) {
     const response1 = await PAYPAY.GetCodePaymentDetails([merchantPaymentId]);
     const body1 = response1.BODY;
     res.send(body1);
-    console.log(body1.resultInfo.code);
     console.log(body1);
 }
+
+/**
+ * @name   SetPaymentRefund() 返品する場合
+ * @param  amount req
+ * @param  merchantPaymentId req
+ * @param  reason_des req 
+ * @param  paymentId req
+ * @return QRcode_info Response
+ * an added 2023.8.10 
+ */
 
 async function SetPaymentRefund(req, res) {
 
@@ -377,13 +394,11 @@ app.post("/payment", (req, res) => {
       });
 })
 
-
 app.get("/getInfo", (req, res) => {   
     
     res.send('clientId: ' + API_KEY + '<br> clientSecret: '+API_SECRET + '<br> merchantId: '+MERCHANT_ID);   
   
 })
-
 
 app.get("/getPaypayInfo", (req, res) => {   
     
