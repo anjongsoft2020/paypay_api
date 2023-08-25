@@ -8,10 +8,12 @@ const configs = require('./config.json');
 
 
 const port = process.env.APP_PORT ? process.env.APP_PORT : 4000;
+
 const API_KEY       = configs.API_KEY;
 const API_SECRET    = configs.API_SECRET;
 const MERCHANT_ID   = configs.MERCHANT_ID;
 const productionMode= configs.productionMode;
+
 // const API_KEY       = process.env.API_KEY;
 // const API_SECRET    = process.env.API_SECRET;
 // const MERCHANT_ID   = process.env.MERCHANT_ID;
@@ -45,21 +47,49 @@ app.get("/getLabQR", (req, res) => {
 })
 
 async function getLabQR(req, res) {
-    // var request = require("request");
+   
+}
 
-    // var options = { method: POST,
-    // url: /v2/codes,
-    // headers: {    
-    //     'Authorization': 'hmac OPA-Auth:a_d0BFWIoJUV_ii0P:munMR2ksHud5OwXu/tXw4uojgPUzUNWQnh7H0fiJvlM=:5f68fd:1690962365:goFh3PqK8qgMqOj5Dv3cOQ==',
-    //     'X-ASSUME-MERCHANT': 653517310849630208,
-    //     'Content-Type': 'application/json',
-    // },
-    //   body: {"amount":1000,"codeType":"ORDER_QR","merchantPaymentId":"DEVELOPER-PANEL-DEMO-06be7ef6-1f90-4444-a21b-99a27c52c4ce","orderDescription":""}, 
-    //   json: true };
-    //    request(options, function (error, response, body) {
-    //     if (error) throw new Error(error);
-    //     console.log(body);
-    // });
+
+app.post("/getUserAuth", (req, res) => { 
+
+    getUserAuth(req, res);
+
+})
+
+async function getUserAuth(req, res) {
+
+    PAYPAY.Configure({
+        clientId: API_KEY,
+        clientSecret: API_SECRET,
+        merchantId: MERCHANT_ID,
+        productionMode: productionMode
+    });
+
+    var uuid = uuidv4() ;// 支払いID（一意になるようにuuidで生成）    
+    // const merchantPaymentId = BigInt(
+    //     "0x" + uuid.replace(/-/g, "")
+    // ).toString();
+    
+    let payload = {
+        scopes: [
+                "direct_debit"
+            ],
+        nonce: "rtyuhghj7989",
+        redirectType: "WEB_LINK",
+        redirectUrl: "https://https://harusaku.co.jp/",
+        referenceId: "091d9fb601804400",
+        phoneNumber: "",
+        deviceId: ""
+        };
+        // Calling the method to create the account linking QR Code
+        PAYPAY.AccountLinkQRCodeCreate(payload, (response) => {
+        // Printing if the method call was SUCCESS
+        console.log(response.BODY);
+        res.send(response);
+        // Printing the link to the generated QR Code
+        //console.log(response.BODY.data.linkQRCodeURL);
+        });    
 }
 
 /**
